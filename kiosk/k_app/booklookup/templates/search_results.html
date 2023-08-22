@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{%block content%}
+<style>
+    .form-control {
+        width:550px;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: x-large;
+    }
+    .button-box {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .card{
+        margin-top: 20px;
+    }
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    h1 {
+      font-family: 'Times New Roman', Times, serif;
+      color: black;
+    }
+    .btn {
+      font-family: 'Times New Roman', Times, serif;
+    }
+    h5 {
+      font-family: 'Times New Roman', Times, serif;
+    }
+    h6 {
+      font-family: 'Times New Roman', Times, serif;
+    }
+    p {
+      font-family: 'Times New Roman', Times, serif;
+    }
+</style>
+
+<h1> Welcome to SIT Library! </h1>
+<hr class="dashed">
+
+<nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+      <form class="d-flex" role="search" method="POST" action="{% url 'search_results'%}">
+        {% csrf_token %}
+        <input class="form-control me-2" type="search" placeholder="Search for book" aria-label="Search" name="searchkey">
+        <button class="btn btn-outline-secondary btn-lg" type="submit">Search</button>
+      </form>
+    </div>
+</nav>
+<hr class="dashed">
+
+{%if result %}
+    <h5>Displaying search results for {{ result }} </h5>
+{%else%}
+    <h5>You havent searched for anything </h5>
+{% endif %}
+
+{% for item in api_book %}
+{% comment %} {{ item }} {% endcomment %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title" style="font-size: x-large; font-weight: bold;">Book name: {{ item.book_name }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted" style="font-weight: lighter;">Author: {{ item.author }}</h6>
+            <p class="card-text">ISBN: {{ item.isbn }} </br>
+                Status: {{ item.status }}
+            </p>
+        </div>
+    </div> 
+{%endfor%}
+<br>
+<a href="{% url 'assist_home' %}" class="previous">&laquo; Back</a>
+{%endblock%}

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{%block content%}
+
+<style>
+    .button-box {
+      text-align: center;
+      margin-top: 20px;
+    }
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    .btn {
+        text-align: center;
+        margin-top: 20px;
+        background-color: tan;
+        border-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    .alert {
+        margin-top: 20px;
+        background-color: tan;
+        border-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: x-large;
+        color: black;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+    }
+    .form-floating {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    .form-select {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    p {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+</style>
+{% if status == True %}
+    <div class="alert alert-primary" role="alert">
+        Please complete all details
+    </div>
+
+    <a href="{% url 'req_lib' %}" class="previous">&laquo; Back</a>
+{% else %}
+    <h1>Which area would you like further assitance?</h1>
+    <hr class="dashed">
+
+    <form  method="POST" action="{% url 'req_lib' %}">
+        {%csrf_token%}
+        <div class="form-floating mb-3">
+            <input type="email" class="form-control" name="UserMail" placeholder="name@example.com">
+            <label for="UserMail">Please enter your email id</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <textarea class="form-control" placeholder="Leave a comment here" name="Subject"></textarea>
+            <label for="Subject">Please Enter your name</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <textarea class="form-control" placeholder="Leave a comment here" name="Body" style="height: 100px"></textarea>
+            <label for="Body">Comments</label>
+        </div>
+
+        <div class="form-floating">
+            <select class="form-select" name="HelpOptions" aria-label="Floating label disabled select example">
+            <option value="HSS">Health Science Services</option>
+            <option value="ENG">English</option>
+            <option value="ICT">ICT</option>
+            <option value="REA">Reasearch</option>
+            </select>
+            <label for="HelpOptions" >Please choose the area of help required</label>
+        </div>
+
+        <input class="btn btn-primary" type="submit">
+        {%if name %}
+            </br>
+            <p class="text-sm-start">Thank you. We have received your email {{ name }}. The librarians will contact you soon.</p>
+        {%endif%}
+        
+        <hr class="dashed">
+        <br>
+
+        <a href="{% url 'assist_home' %}" class="previous">&laquo; Back</a>
+
+{%endif%}
+</form>
+
+{%endblock%}

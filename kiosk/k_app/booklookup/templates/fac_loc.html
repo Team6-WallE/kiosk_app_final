@@ -1,0 +1,235 @@
+
+{% extends 'base.html' %}
+
+{%block content%}
+
+<style>
+    .rectangle {
+        height: 200px;
+        width: 100%;
+        background-color: aliceblue;
+        border-style: double;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-areas: "button1 button2"
+                            "button3 button4";
+      grid-gap: 5px;
+      column-gap: 1px;
+      justify-items: center;
+    }
+    .grid-item:nth-child(1){
+        grid-area: button1;
+    }
+    .grid-item:nth-child(2){
+        grid-area: button2;
+    }
+    .grid-item:nth-child(3){
+        grid-area: button3;
+    }
+    .grid-item:nth-child(4){
+        grid-area: button4;
+    }
+    .button {
+        width: 500px;
+        height: 50px;
+        background-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: xx-large;
+        border-radius: 30px;
+    }
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+    }
+    p {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    ul {
+        font-family: 'Times New Roman', Times, serif;
+        font-weight: bold;
+    }
+    .alert {
+        padding: 20px;
+        background-color: tan;
+        color: black;
+        visibility: collapse;
+    }
+    img {
+        height: 500px;
+    }
+</style>
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+<script type="text/javascript">
+
+    var pos;
+    var goal = 0;
+
+    function locat(val){
+        if(val === "Library"){
+            pos = 1;
+        }
+        
+        if(val === "Study Area"){
+            pos = 2;
+        }
+
+        if(val === "Book Drop"){
+            pos = 3;
+        }
+
+        if(val === "Exit"){
+            pos = 4;
+        }
+    }
+
+    function printAlert(g, n){
+        if(g === 0 && n === 1){
+            document.getElementById("alerting").style.visibility="visible";
+            document.getElementById("alerting").innerHTML="Navigating to the location";
+        }
+
+        if(g === 1 && n ===0){
+            document.getElementById("alerting").style.visibility="visible";
+            document.getElementById("alerting").innerHTML="You have reached your location";
+        }
+
+        if(g === 0 && n === 0){
+            document.getElementById("alerting").style.visibility="hidden";
+        }
+    }
+
+    const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+
+    ros.on("connection", () => {
+        document.getElementById("status").innerHTML = "successful";
+    });
+
+    ros.on("error", (error) => {
+        document.getElementById("status").innerHTML = `errored out (${error})`;
+    });
+
+    ros.on("close", () => {
+        document.getElementById("status").innerHTML = "closed";
+    });
+
+    var goal_number_publisher = new ROSLIB.Topic({
+        ros,
+        name: "/goal_number",
+        messageType: "std_msgs/Int64"
+    });
+
+    var goal_status_subscriber = new ROSLIB.Topic({
+        ros,
+        name: "/goal_status",
+        messageType: "std_msgs/Int64"
+    });
+
+    goal_status_subscriber.subscribe(function(message) {
+        goal = message.data
+        console.log("goal ", goal)
+        document.getElementById("goal_msg").innerHTML = message.data
+    });
+
+    var lib_count = 1;
+    var study_count = 2;
+    var book_count = 3;
+    var exit_count = 4;
+    setInterval(() => {
+        locat();
+        var msg;
+        if(goal === 10){
+            msg = 0;
+            pos = 0;
+            goal = 0;
+            printAlert(1,0);
+            setTimeout(() => printAlert(0,0), 5000);
+        }
+        else {
+            if(pos === 1){
+                msg = lib_count;
+                printAlert(0,1);
+            }
+
+            if(pos === 2){
+                msg = study_count;
+                printAlert(0,1);
+            }
+
+            if(pos === 3){
+                msg = book_count;
+                printAlert(0,1);
+            }
+
+            if(pos === 4){
+                msg = exit_count;
+                printAlert(0,1);
+            }
+        }
+
+        goal_number_publisher.publish({data: msg});
+        document.getElementById("messages").innerText = msg;
+    }, 1000);
+
+</script>
+
+<h1> Where would you like to go?</h1>
+<hr class="dashed">
+{% load static %}
+<div class="text-center p-5 mt-5 container border shadowsm">
+    <img src="{% static 'booklookup/image/my_home.png'%}" alt="map">
+</div>
+
+<div class="alert" id="alerting">Please select location</div> 
+
+<div class="grid-container">
+    <div class="grid-item">
+        <input type="button" id="library" class="button" value="Library" onclick="locat(this.value);">
+    </div>
+
+    <div class="grid-item">
+        <input type="button" id="library" class="button" value="Study Area" onclick="locat(this.value)">
+    </div>
+
+    <div class="grid-item">
+        <input type="button" id="library" class="button" value="Book Drop" onclick="locat(this.value)">
+    </div>
+
+    <div class="grid-item">
+        <input type="button" id="library" class="button" value="Exit" onclick="locat(this.value)">
+    </div>
+</div>
+
+<br>
+
+<a href="{% url 'assist_home' %}" class="previous">&laquo; Back</a>
+<hr class="dashed">
+<p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+<p><code>/goal_number</code> messages received: <ul id="messages"></ul></p>
+<br>
+<p><code>/goal_status</code> messages subscribed: <ul id="goal_msg"></ul></p>
+
+{%endblock%}

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{%block content%}
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-areas: "button1 button2";
+    }
+    .grid-item:nth-child(1){
+        grid-area: button1;
+    }
+    .grid-item:nth-child(2){
+        grid-area: button2;
+    }
+    .button {
+        width: 75%;
+        height: 200px;
+        background-color: tan;
+        border-radius: 30px;
+        font-size: xx-large;
+        font-family: 'Times New Roman', Times, serif;
+        align-content: center;
+    }
+    .button-box {
+        width: 100%;
+    }
+    .btn {
+        background-color: coral;
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+        font-size: large;
+
+    }
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+    }
+    p {
+        font-family: 'Times New Roman', Times, serif;
+    }
+    ul {
+        font-family: 'Times New Roman', Times, serif;
+        font-weight: bold;
+    }
+</style>
+
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript">
+    var mode_no;
+    function mode(val){
+        if(val === "AUTO"){
+            mode_no = 1;
+            window.alert("You are setting to AUTO Mode");
+        }
+
+        if(val === "MANUAL"){
+            mode_no = 2;
+            window.alert("You are setting to MANUAL Mode");
+        }
+    }
+
+    const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+    ros.on("connection", () => {
+        document.getElementById("status").innerHTML = "successful";
+    });
+
+    ros.on("error", (error) => {
+        document.getElementById("status").innerHTML = `errored out (${error})`;
+    });
+
+    ros.on("close", () => {
+        document.getElementById("status").innerHTML = "closed";
+    });
+
+    var state_publisher = new ROSLIB.Topic({
+        ros,
+        name: "/state",
+        messageType: "std_msgs/Int64"
+    });
+
+    setInterval(() => {
+        mode();
+        var msg;
+        msg = mode_no;
+        state_publisher.publish({data: msg});
+        document.getElementById("messages").innerHTML = msg;
+    }, 1000);
+</script>
+
+<br>
+<h1> Set Auto or Manual mode</h1>
+<hr class="dashed">
+<br>
+ 
+
+<div class="grid-container">
+    <div class="grid-item">
+        <a href="{% url 'assist_home' %}"><input type="button" class="button" value="AUTO" onclick="mode(this.value)"></a>
+    </div>
+    <div class="grid-item">
+        <a href="{% url 'checkin' %}"><input type="button" class="button" value="MANUAL" onclick="mode(this.value)"></a>
+    </div>
+</div>
+<br>
+
+<a href="{% url 'logout' %}" class="btn btn-primary" name="logout" role="button" style="float: left;">Logout</a>
+
+<br>
+<br>
+<hr class="dashed">
+<p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+<p><code>/state</code> message sending: <ul id="messages"></ul></p>
+
+
+{%endblock%}

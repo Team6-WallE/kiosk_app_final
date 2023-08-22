@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{%block content%}
+<style>
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-areas: "button1 button2"
+                            "button3 button4";
+      grid-gap: 5px;
+      column-gap: 1px;
+      justify-items: center;
+    }
+    .grid-item:nth-child(1){
+        grid-area: button1;
+    }
+    .grid-item:nth-child(2){
+        grid-area: button2;
+    }
+    .grid-item:nth-child(3){
+        grid-area: button3;
+    }
+    .grid-item:nth-child(4){
+        grid-area: button4;
+    }
+    .button {
+        width: 500px;
+        height: 250px;
+        background-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: xx-large;
+        border-radius: 30px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+    }
+    .form-control {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      width: 550px;
+    }
+    .btn {
+      font-family: 'Times New Roman', Times, serif;
+    }
+</style>
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript">
+
+  const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+  ros.on("connection", () => {
+      document.getElementById("status").innerHTML = "successful";
+  });
+
+  ros.on("error", (error) => {
+      document.getElementById("status").innerHTML = `errored out (${error})`;
+  });
+
+  ros.on("close", () => {
+      document.getElementById("status").innerHTML = "closed";
+  });
+
+  var time_subscriber = new ROSLIB.Topic({
+      ros,
+      name: "/time_update",
+      messageType: "std_msgs/Int64"
+  });
+
+  time_subscriber.subscribe(function(message) {
+        var time;
+        time = message.data
+        document.getElementById("time_update").innerHTML = message.data
+        if (time === 1){
+          document.getElementById("time_change").submit();
+        }
+  });
+
+</script>
+
+<h1> Welcome to SIT Library! </h1>
+<hr class="dashed">
+
+<nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+      <form class="d-flex" role="search" method="POST" action="{% url 'search_results'%}">
+        {% csrf_token %}
+        <input class="form-control me-2" type="search" placeholder="Search for book - First 4 characters" aria-label="Search" name="searchkey">
+        <button class="btn btn-outline-secondary btn-lg" type="submit">Search</button>
+      </form>
+    </div>
+</nav>
+
+<hr class="dashed">
+
+<div class="grid-container">
+  <div class="grid-item">
+      <a href="{% url 'book_fac' %}"><input type="button" id="Booking Facilities" class="button" value="Booking Facilities"></a>
+  </div>
+
+  <div class="grid-item">
+    <a href="{% url 'fac_loc' %}"><input type="button" id="Facilities Location" class="button" value="Facilities Location"></a>
+  </div>
+
+  <div class="grid-item">
+    <a href="{% url 'req_lib' %}"><input type="button" id="Request Librarians" class="button" value="Request Librarians"></a>
+  </div>
+
+  <div class="grid-item">
+    <a href="{% url 'faq' %}"><input type="button" id="FAQ" class="button" value="FAQ"></a>
+  </div>
+</div>
+
+<br>
+<a href="{% url 'set_mode' %}" class="previous">&laquo; Back</a>
+<hr class="dashed">
+
+<p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+<p><code>/time_update</code> message receiving: <ul id="time_update"></ul></p>
+
+
+<form method="post" class="text-center" id="time_change">{%csrf_token%}
+</form>
+{%endblock%}

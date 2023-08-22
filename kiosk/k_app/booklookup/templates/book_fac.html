@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{%block content%}
+
+<style>
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-areas: "button1 button2"
+                            "button3 button4"
+                            "button5 button6";
+      grid-gap: 5px;
+      column-gap: 1px;
+      justify-items: center;
+    }
+    .grid-item:nth-child(1){
+        grid-area: button1;
+    }
+    .grid-item:nth-child(2){
+        grid-area: button2;
+    }
+    .grid-item:nth-child(3){
+        grid-area: button3;
+    }
+    .grid-item:nth-child(4){
+        grid-area: button4;
+    }
+    .grid-item:nth-child(5){
+        grid-area: button5;
+    }
+    .grid-item:nth-child(6){
+        grid-area: button6;
+    }
+    .button {
+        width: 500px;
+        height: 250px;
+        background-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: xx-large;
+        border-radius: 30px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+    }
+    .form-floating {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    .form-select {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    .btn {
+        text-align: center;
+        margin-top: 20px;
+        background-color: tan;
+        border-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    p {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+</style>
+
+<h1>Which facility would you like to book?</h1>
+<hr class="dashed">
+
+<form  method="POST" action="{% url 'book_fac' %}">
+    {%csrf_token%}
+    <div class="form-floating mb-3">
+        <input type="email" class="form-control" name="UserMail" placeholder="name@example.com">
+        <label for="UserMail">Name</label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <textarea class="form-control" placeholder="Leave a comment here" name="Subject"></textarea>
+        <label for="Subject">Student ID</label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <textarea class="form-control" placeholder="Leave a comment here" name="Subject"></textarea>
+        <label for="Subject">Email ID</label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <textarea class="form-control" placeholder="Leave a comment here" name="Body" style="height: 100px"></textarea>
+        <label for="Body">Comments</label>
+    </div>
+
+    <div class="form-floating">
+        <select class="form-select" name="HelpOptions" aria-label="Floating label disabled select example">
+        <option value="HSS">LOLA</option>
+        <option value="ENG">Student room</option>
+        <option value="ICT">AUTOMAGE</option>
+        <option value="REA">Study room</option>
+        </select>
+        <label for="HelpOptions" >Please choose the area of help required</label>
+    </div>
+
+    <input class="btn btn-primary" type="submit">
+    
+    <hr class="dashed">
+    <br>
+
+    <a href="{% url 'assist_home' %}" class="previous">&laquo; Back</a>
+
+</form>
+{%endblock%}

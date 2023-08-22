@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{%block content%}
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-areas: "button1 button2";
+    }
+    .grid-item:nth-child(1){
+        grid-area: button1;
+    }
+    .grid-item:nth-child(2){
+        grid-area: button2;
+    }
+    .button {
+        width: 500px;
+        height: 200px;
+        background-color: tan;
+        border-radius: 30px;
+        font-size: xx-large;
+        font-family: 'Times New Roman', Times, serif;
+        align-content: center;
+    }
+    .button-box {
+        width: 100%;
+    }
+    .btn {
+        background-color: coral;
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+        font-size: large;
+
+    }
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+    }
+    p {
+        font-family: 'Times New Roman', Times, serif;
+    }
+    ul {
+        font-family: 'Times New Roman', Times, serif;
+        font-weight: bold;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    
+</style>
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript">
+    var mode_no;
+    function mode(val){
+        if(val === "Assist mode"){
+            mode_no = 1;
+            window.alert("You are setting to Assist Mode");
+        }
+
+        if(val === "Patrol Mode"){
+            mode_no = 2;
+            window.alert("You are setting to Patrol Mode");
+        }
+    }
+
+    const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+    ros.on("connection", () => {
+        document.getElementById("status").innerHTML = "successful";
+    });
+
+    ros.on("error", (error) => {
+        document.getElementById("status").innerHTML = `errored out (${error})`;
+    });
+
+    ros.on("close", () => {
+        document.getElementById("status").innerHTML = "closed";
+    });
+
+    var mode_publisher = new ROSLIB.Topic({
+        ros,
+        name: "/mode_state",
+        messageType: "std_msgs/Int64"
+    });
+
+    setInterval(() => {
+        mode();
+        var msg;
+        msg = mode_no;
+        mode_publisher.publish({data: msg});
+        document.getElementById("messages").innerHTML = msg;
+    }, 1000);
+</script>
+
+<br>
+<h1> Set kiosk mode</h1>
+<hr class="dashed">
+<br>
+ 
+<div class="grid-container">
+    <div class="grid-item">
+        <a href="{% url 'assist_home' %}"><input type="button" class="button" value="Assist mode" onclick="mode(this.value)"></a>
+    </div>
+    <div class="grid-item">
+        <a href="{% url 'patrol_home' %}"><input type="button" class="button" value="Patrol Mode" onclick="mode(this.value)"></a>
+        <!-- <a href="http://127.0.0.1:8080"><input type="button" class="button" value="Patrol Mode" onclick="mode(this.value)"></a> -->
+    </div>
+</div>
+<br>
+<br>
+
+<a href="{% url 'set_mode' %}" class="previous">&laquo; Back</a>
+
+<hr class="dashed">
+<p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+<p><code>/mode_state</code> message sending: <ul id="messages"></ul></p>
+
+{%endblock%}

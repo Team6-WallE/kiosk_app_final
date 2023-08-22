@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{%block content%}
+<style>
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    .button {
+        width: 500px;
+        height: 250px;
+        background-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: xx-large;
+        border-radius: 30px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+    }
+    .form-control {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      width: 550px;
+    }
+    .btn {
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .alert {
+        padding: 20px;
+        background-color: tan;
+        color: black;
+    }
+</style>
+
+<h1> Patrol mode </h1>
+<hr class="dashed">
+
+<br>
+<a href="{% url 'set_mode' %}" class="previous">&laquo; Back</a>
+
+<div class="row my-4">
+  <div class="col d-flex justify-content-center">
+      <img src="" class="p-1 bg-dark" alt="" id="video" />
+  </div>
+</div>
+<div class="alert" id="human_detect" style="visibility: hidden;">Human has been detected</div>
+
+{% if messages%}
+{% for message in messages%}
+<div class="text-center mt-5">{{message}}</div>
+{%endfor%}
+{%endif%}
+
+<hr class="dashed">
+
+<p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+<p><code>/is_detected</code> message receiving: <ul id="detected"></ul></p>
+<p><code>/music</code> message sending: <ul id="music"></ul></p>
+<p><code>/assist_human</code> message receiving: <ul id="assist"></ul></p>
+
+<hr class="dashed">
+
+<form action="" method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="submit" value="Submit">
+</form>
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript">
+comp_IP = "192.168.10.172";
+  window.onload = function() {
+      video = document.getElementById('video');
+      video.src = "http://" + comp_IP + ":8080/stream?topic=/image_cv&type=mjpeg&quality=80";
+  }
+
+  let human;
+  let assist;
+  const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+  ros.on("connection", () => {
+      document.getElementById("status").innerHTML = "successful";
+  });
+
+  ros.on("error", (error) => {
+      document.getElementById("status").innerHTML = `errored out (${error})`;
+  });
+
+  ros.on("close", () => {
+      document.getElementById("status").innerHTML = "closed";
+  });
+
+  var human_subscriber = new ROSLIB.Topic({
+      ros,
+      name: "/is_detected",
+      messageType: "std_msgs/Int16"
+  });
+
+  var assist_subscriber = new ROSLIB.Topic({
+      ros,
+      name: "/assist_human",
+      messageType: "std_msgs/Int16"
+  });
+
+  var music_publisher = new ROSLIB.Topic({
+      ros,
+      name: "/music",
+      messageType: "std_msgs/Int64"
+  });
+
+  human_subscriber.subscribe(function(message) {
+        human = message.data
+        document.getElementById("detected").innerHTML = message.data
+  });
+
+  assist_subscriber.subscribe(function(message) {
+        assist = message.data
+        document.getElementById("assist").innerHTML = message.data
+  });
+
+  setInterval(() => {
+    var msg;
+    if(human === 1){
+      document.getElementById("human_detect").style.visibility="visible";
+      human = 0;
+    }
+    else{
+      document.getElementById("human_detect").style.visibility="hidden";
+    }
+    if(assist === 1){
+        msg = 1;
+        assist = 0;
+    }
+    else{
+        msg = 0;
+    }
+    music_publisher.publish({data: msg});
+    document.getElementById("music").innerText = msg;
+  }, 1000);
+
+
+</script>
+
+
+{%endblock%}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{%block content%}
+<style>
+    .form-control {
+        width:500px;
+    }
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+    }
+    h4 {
+        font-family: 'Times New Roman', Times, serif;
+    }
+    .form-group {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+    .btn {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: large;
+    }
+</style>
+
+<br>
+<h1>Login</h1>
+<hr class="dashed">
+<h4>Please enter your credentials </h4>
+
+{%if messages %}
+    {%for message in messages%}
+        {{ message }}
+    {% endfor %}
+{% endif %}
+
+<form action="" method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="exampleInputEmail1">Username</label>
+        <input type="text" class="form-control" name="username" aria-describedby="emailHelp" placeholder="Enter username">
+    </div>
+    <br>
+
+    <div class="form-group">
+        <label for="exampleInputPassword1">Password</label>
+        <input type="password" class="form-control" name="password" placeholder="Password">
+    </div>
+    <br>
+    <input type="submit" value="Submit" class="btn btn-secondary">
+</form>
+
+{%endblock%}
